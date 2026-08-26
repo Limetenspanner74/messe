@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
-import { ArrowLeft, Copy, MoreVertical, Phone, Search, Trash2, X } from 'lucide-react'
+import { ArrowLeft, Copy, MoveVertical as MoreVertical, Phone, Search, Trash2, X } from 'lucide-react'
 import type { Chat, Message } from '@/lib/messenger-data'
 import { makeWaveform } from '@/lib/messenger-data'
 import { MessageRow } from '@/components/message-row'
