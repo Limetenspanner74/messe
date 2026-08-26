@@ -21,9 +21,12 @@ This produces an `out/` folder containing static HTML, CSS, and JS files you can
 
 1. Push this repo to GitHub.
 2. In the repo, go to **Settings → Pages → Build and deployment → Source** and choose **GitHub Actions**.
-3. Push to `main`. The included workflow (`.github/workflows/deploy.yml`) builds the site and publishes the `out/` folder to Pages.
+3. Push to `main`. The included workflow (`.github/workflows/deploy.yml`) automatically:
+   - Derives the base path from your repository name (e.g. `my-repo` → `/my-repo`)
+   - Builds the static site with that base path
+   - Publishes the `out/` folder to GitHub Pages
 
-The site is configured with the base path `/paper-messenger`. If your repository is named differently, update `basePath` in `next.config.mjs` to `/<your-repo-name>`.
+The base path is set automatically during the GitHub Actions build via the `NEXT_PUBLIC_BASE_PATH` environment variable. No manual configuration needed.
 
 ## Preview the export locally
 

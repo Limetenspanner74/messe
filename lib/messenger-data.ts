@@ -280,4 +280,6 @@ export const emojiRows = [
 
 export const quickReactions = ['❤️', '😂', '👍', '🔥', '😮', '🙏']
 
+export const moreReactions = ['😢', '🎉', '🤝', '☕️', '📖', '✍️', '🌿', '🕯', '🧵', '💡', '🐈', '🙏']
+
 export const makeWaveform = wave

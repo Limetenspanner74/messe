@@ -16,13 +16,13 @@ export function WelcomeScreen({ onStart }: { onStart: () => void }) {
 
   return (
     <div className="paper-grain flex min-h-dvh items-center justify-center bg-background px-4 py-6 sm:px-6">
-      <div className="relative flex min-h-[calc(100dvh-3rem)] w-full max-w-[420px] flex-col overflow-hidden rounded-[2.5rem] bg-background px-5 py-6 raised sm:min-h-[860px]">
+      <div className="relative flex w-full max-w-[420px] flex-col overflow-hidden rounded-[2.5rem] bg-background px-5 py-6 raised sm:my-4 sm:max-h-[860px] sm:min-h-[680px] md:max-w-[440px] lg:max-w-[460px]">
         <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
           <span>Paper messenger</span>
           <span>01 / 01</span>
         </div>
 
-        <div className="flex flex-1 flex-col justify-center pb-8 pt-12">
+        <div className="flex flex-1 flex-col justify-center pb-4 pt-8">
           <div className="mb-7 grid size-20 place-items-center rounded-[1.75rem] bg-primary text-primary-foreground raised">
             <KeyRound className="size-8" />
           </div>
@@ -36,7 +36,7 @@ export function WelcomeScreen({ onStart }: { onStart: () => void }) {
             Keep your conversations close, beautifully simple, and ready wherever you open them.
           </p>
 
-          <div className="mt-9 rounded-[1.5rem] bg-card p-4 raised-sm">
+          <div className="mt-8 rounded-[1.5rem] bg-card p-4 raised-sm">
             <div className="mb-3 flex items-center gap-2 text-xs font-medium">
               <LockKeyhole className="size-4 text-primary" />
               <span>Your personal token link</span>
@@ -83,7 +83,7 @@ export function WelcomeScreen({ onStart }: { onStart: () => void }) {
         <button
           type="button"
           onClick={onStart}
-          className="flex w-full items-center justify-between rounded-2xl bg-primary px-5 py-4 text-[15px] text-primary-foreground raised active-press"
+          className="mt-2 flex w-full items-center justify-between rounded-2xl bg-primary px-5 py-4 text-[15px] text-primary-foreground raised active-press"
         >
           <span>Start using Paper</span>
           <ArrowRight className="size-5" />

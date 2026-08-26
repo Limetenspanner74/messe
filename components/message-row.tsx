@@ -15,7 +15,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import type { Message } from '@/lib/messenger-data'
-import { quickReactions } from '@/lib/messenger-data'
+import { quickReactions, moreReactions } from '@/lib/messenger-data'
 import { VoiceMessage } from '@/components/voice-message'
 import { cn } from '@/lib/utils'
 
@@ -41,12 +41,16 @@ export function MessageRow({
   selected?: boolean
 }) {
   const [tapMenu, setTapMenu] = useState(false)
+  const [expanded, setExpanded] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const didLongPress = useRef(false)
   const mine = message.mine
 
   useEffect(() => {
-    if (!tapMenu) return
+    if (!tapMenu) {
+      setExpanded(false)
+      return
+    }
     const close = () => setTapMenu(false)
     const id = setTimeout(() => document.addEventListener('pointerdown', close), 0)
     return () => {
@@ -118,16 +122,47 @@ export function MessageRow({
               ))}
               <button
                 type="button"
-                onClick={() => {
-                  setTapMenu(false)
-                  onOpenEmojiMenu()
-                }}
-                aria-label="Open expanded reactions"
-                className="grid size-8 place-items-center rounded-full bg-accent text-accent-foreground active:scale-90"
+                onClick={() => setExpanded((v) => !v)}
+                aria-label={expanded ? 'Collapse reactions' : 'Expand more reactions'}
+                className={cn(
+                  'grid size-8 place-items-center rounded-full text-accent-foreground transition-all active:scale-90',
+                  expanded ? 'bg-primary text-primary-foreground' : 'bg-accent',
+                )}
               >
-                <ChevronDown className="size-4" />
+                <ChevronDown className={cn('size-4 transition-transform', expanded && 'rotate-180')} />
               </button>
             </div>
+            {expanded && (
+              <div className="rise-in grid grid-cols-6 gap-1 border-b border-border/60 px-1 py-1.5">
+                {moreReactions.map((emoji) => (
+                  <button
+                    key={emoji}
+                    type="button"
+                    onClick={() => {
+                      onReact(emoji)
+                      setTapMenu(false)
+                      setExpanded(false)
+                    }}
+                    className="grid size-8 place-items-center rounded-full text-lg hover:bg-accent active:scale-90"
+                    aria-label={`React with ${emoji}`}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTapMenu(false)
+                    setExpanded(false)
+                    onOpenEmojiMenu()
+                  }}
+                  className="grid size-8 place-items-center rounded-full bg-accent text-accent-foreground active:scale-90"
+                  aria-label="Open full emoji picker"
+                >
+                  <Plus className="size-4" />
+                </button>
+              </div>
+            )}
             <div className="grid gap-0.5 pt-1">
               <button
                 type="button"

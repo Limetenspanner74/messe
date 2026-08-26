@@ -19,12 +19,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Derive base path from repo name
+        id: repo_name
+        run: echo "name=/${GITHUB_REPOSITORY##*/}" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npm run build
+      - name: Build static site
+        run: npm run build
+        env:
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.repo_name.outputs.name }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out
