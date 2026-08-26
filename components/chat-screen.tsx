@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
-import { ArrowLeft, MoreVertical, Phone, Search, X } from 'lucide-react'
+import { ArrowLeft, Copy, MoreVertical, Phone, Search, Trash2, X } from 'lucide-react'
 import type { Chat, Message } from '@/lib/messenger-data'
 import { makeWaveform } from '@/lib/messenger-data'
 import { MessageRow } from '@/components/message-row'
@@ -30,6 +30,8 @@ export function ChatScreen({
   const [searching, setSearching] = useState(false)
   const [query, setQuery] = useState('')
   const [emoji, setEmoji] = useState<{ target: 'composer' | string } | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [notice, setNotice] = useState<string | null>(null)
   const scroller = useRef<HTMLDivElement>(null)
 
   const visible = useMemo(() => {
@@ -63,6 +65,28 @@ export function ChatScreen({
 
   const append = (m: Message) => onUpdate([...chat.messages, m])
   const id = () => `n${Date.now()}`
+  const clearSelection = () => setSelectedIds(new Set())
+  const flash = (message: string) => {
+    setNotice(message)
+    window.setTimeout(() => setNotice(null), 1800)
+  }
+  const messageText = (message: Message) =>
+    message.kind === 'text'
+      ? message.body
+      : message.kind === 'file'
+        ? message.name
+        : message.kind === 'voice'
+          ? 'Voice message'
+          : 'Video message'
+  const copyMessage = async (message: Message) => {
+    await navigator.clipboard.writeText(messageText(message))
+    flash('Message copied')
+  }
+  const removeMessages = (ids: Set<string>) => {
+    onUpdate(chat.messages.filter((message) => !ids.has(message.id)))
+    clearSelection()
+    flash('Message deleted')
+  }
 
   return (
     <div className="relative flex h-full flex-col">
@@ -173,6 +197,19 @@ export function ChatScreen({
                 message={m}
                 onReact={(e) => react(m.id, e)}
                 onOpenEmojiMenu={() => setEmoji({ target: m.id })}
+                onCopy={() => copyMessage(m)}
+                onReply={() => flash(`Replying to ${chat.name}`)}
+                onDelete={() => removeMessages(new Set([m.id]))}
+                onLongPress={() =>
+                  setSelectedIds((current) => {
+                    const next = new Set(current)
+                    if (next.has(m.id)) next.delete(m.id)
+                    else next.add(m.id)
+                    return next
+                  })
+                }
+                selectionMode={selectedIds.size > 0}
+                selected={selectedIds.has(m.id)}
               />
             ))}
           </div>
@@ -181,6 +218,54 @@ export function ChatScreen({
           )}
         </div>
       </div>
+
+      {notice && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-24 z-40 flex justify-center">
+          <span className="rounded-full bg-foreground px-4 py-2 font-mono text-[10px] uppercase tracking-wider text-background raised">
+            {notice}
+          </span>
+        </div>
+      )}
+
+      {selectedIds.size > 0 && (
+        <div className="absolute inset-0 z-30 flex flex-col justify-end bg-foreground/10 backdrop-blur-[1px]">
+          <button
+            type="button"
+            aria-label="Cancel selection"
+            onClick={clearSelection}
+            className="absolute inset-0 cursor-default"
+          />
+          <div className="rise-in relative rounded-t-[1.75rem] bg-popover px-4 pb-5 pt-4 raised">
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-foreground/15" />
+            <div className="mb-4 flex items-center justify-between">
+              <span className="text-sm font-medium">{selectedIds.size} message{selectedIds.size === 1 ? '' : 's'} selected</span>
+              <button type="button" onClick={clearSelection} className="rounded-full px-3 py-1.5 text-xs text-muted-foreground hover:bg-accent">
+                Cancel
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const first = chat.messages.find((message) => selectedIds.has(message.id))
+                  if (first) void copyMessage(first)
+                  clearSelection()
+                }}
+                className="flex items-center justify-center gap-2 rounded-2xl bg-card px-4 py-3.5 text-sm raised-sm active-press"
+              >
+                <Copy className="size-4 text-primary" /> Copy
+              </button>
+              <button
+                type="button"
+                onClick={() => removeMessages(selectedIds)}
+                className="flex items-center justify-center gap-2 rounded-2xl bg-card px-4 py-3.5 text-sm text-destructive raised-sm active-press"
+              >
+                <Trash2 className="size-4" /> Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Composer
         onOpenEmoji={() => setEmoji({ target: 'composer' })}

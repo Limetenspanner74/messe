@@ -2,7 +2,18 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import { Check, CheckCheck, FileText, Play, Plus, Download } from 'lucide-react'
+import {
+  Check,
+  CheckCheck,
+  ChevronDown,
+  Copy,
+  Download,
+  FileText,
+  Play,
+  Plus,
+  Reply,
+  Trash2,
+} from 'lucide-react'
 import type { Message } from '@/lib/messenger-data'
 import { quickReactions } from '@/lib/messenger-data'
 import { VoiceMessage } from '@/components/voice-message'
@@ -12,97 +23,171 @@ export function MessageRow({
   message,
   onReact,
   onOpenEmojiMenu,
+  onCopy,
+  onReply,
+  onDelete,
+  onLongPress,
+  selectionMode = false,
+  selected = false,
 }: {
   message: Message
   onReact: (emoji: string) => void
   onOpenEmojiMenu: () => void
+  onCopy: () => void
+  onReply: () => void
+  onDelete: () => void
+  onLongPress: () => void
+  selectionMode?: boolean
+  selected?: boolean
 }) {
-  const [picker, setPicker] = useState(false)
+  const [tapMenu, setTapMenu] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const didLongPress = useRef(false)
   const mine = message.mine
 
   useEffect(() => {
-    if (!picker) return
-    const close = () => setPicker(false)
+    if (!tapMenu) return
+    const close = () => setTapMenu(false)
     const id = setTimeout(() => document.addEventListener('pointerdown', close), 0)
     return () => {
       clearTimeout(id)
       document.removeEventListener('pointerdown', close)
     }
-  }, [picker])
+  }, [tapMenu])
 
-  const hold = {
-    onPointerDown: () => {
-      timer.current = setTimeout(() => setPicker(true), 320)
-    },
-    onPointerUp: () => {
-      if (timer.current) clearTimeout(timer.current)
-    },
-    onPointerLeave: () => {
-      if (timer.current) clearTimeout(timer.current)
-    },
+  const beginPress = () => {
+    didLongPress.current = false
+    timer.current = setTimeout(() => {
+      didLongPress.current = true
+      setTapMenu(false)
+      onLongPress()
+    }, 420)
   }
+
+  const endPress = () => {
+    if (timer.current) clearTimeout(timer.current)
+  }
+
+  const handleClick = () => {
+    if (didLongPress.current) {
+      didLongPress.current = false
+      return
+    }
+    if (selectionMode) onLongPress()
+    else setTapMenu((open) => !open)
+  }
+
+  const timeMark = (
+    <span
+      className={cn(
+        'flex items-center justify-end gap-1 font-mono text-[10px]',
+        mine ? 'text-primary-foreground/70' : 'text-muted-foreground',
+      )}
+    >
+      {message.time}
+      {mine &&
+        (message.read ? <CheckCheck className="size-3.5" /> : <Check className="size-3.5" />)}
+    </span>
+  )
 
   return (
     <div className={cn('flex flex-col gap-1', mine ? 'items-end' : 'items-start')}>
       <div className="relative">
-        {picker && (
+        {tapMenu && !selectionMode && (
           <div
             className={cn(
-              'rise-in absolute -top-13 z-20 flex items-center gap-1 rounded-full bg-popover px-2 py-1.5 raised',
-              mine ? 'right-0' : 'left-0',
+              'rise-in absolute z-30 w-52 overflow-hidden rounded-2xl bg-popover p-1.5 raised',
+              mine ? 'right-0 top-full mt-2' : 'left-0 top-full mt-2',
             )}
             onPointerDown={(e) => e.stopPropagation()}
           >
-            {quickReactions.map((e) => (
+            <div className="flex items-center gap-1 border-b border-border/60 px-1 pb-1.5">
+              {quickReactions.slice(0, 5).map((emoji) => (
+                <button
+                  key={emoji}
+                  type="button"
+                  onClick={() => {
+                    onReact(emoji)
+                    setTapMenu(false)
+                  }}
+                  className="grid size-8 place-items-center rounded-full text-lg hover:bg-accent active:scale-90"
+                  aria-label={`React with ${emoji}`}
+                >
+                  {emoji}
+                </button>
+              ))}
               <button
-                key={e}
                 type="button"
                 onClick={() => {
-                  onReact(e)
-                  setPicker(false)
+                  setTapMenu(false)
+                  onOpenEmojiMenu()
                 }}
-                className="grid size-8 place-items-center rounded-full text-lg transition-transform active:scale-90 hover:bg-accent"
-                aria-label={`React with ${e}`}
+                aria-label="Open expanded reactions"
+                className="grid size-8 place-items-center rounded-full bg-accent text-accent-foreground active:scale-90"
               >
-                {e}
+                <ChevronDown className="size-4" />
               </button>
-            ))}
-            <button
-              type="button"
-              onClick={() => {
-                setPicker(false)
-                onOpenEmojiMenu()
-              }}
-              aria-label="Open all reactions"
-              className="grid size-8 place-items-center rounded-full bg-accent text-accent-foreground"
-            >
-              <Plus className="size-4" />
-            </button>
+            </div>
+            <div className="grid gap-0.5 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setTapMenu(false)
+                  onReply()
+                }}
+                className="menu-action"
+              >
+                <Reply className="size-4" /> Reply
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTapMenu(false)
+                  onCopy()
+                }}
+                className="menu-action"
+              >
+                <Copy className="size-4" /> Copy
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTapMenu(false)
+                  onDelete()
+                }}
+                className="menu-action text-destructive"
+              >
+                <Trash2 className="size-4" /> Delete
+              </button>
+            </div>
           </div>
         )}
 
         <div
-          {...hold}
+          onPointerDown={beginPress}
+          onPointerUp={endPress}
+          onPointerCancel={endPress}
+          onPointerLeave={endPress}
+          onClick={handleClick}
           data-bubble=""
-          onDoubleClick={() => onReact('❤️')}
-          role="group"
-          aria-label="Message — press and hold to react"
+          role="button"
+          tabIndex={0}
+          aria-label="Message — tap for actions, press and hold to select"
           className={cn(
-            'block max-w-[17rem] select-none px-3.5 py-2.5 text-left text-[15px] leading-relaxed transition-shadow',
-            mine
-              ? 'rounded-2xl rounded-br-md bg-primary text-primary-foreground raised-sm'
-              : 'rounded-2xl rounded-bl-md bg-card text-card-foreground raised-sm',
+            message.kind === 'video'
+              ? 'select-none text-left'
+              : 'block max-w-[17rem] select-none px-3.5 py-2.5 text-left text-[15px] leading-relaxed transition-shadow',
+            selected && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
+            message.kind !== 'video' &&
+              (mine
+                ? 'rounded-2xl rounded-br-md bg-primary text-primary-foreground raised-sm'
+                : 'rounded-2xl rounded-bl-md bg-card text-card-foreground raised-sm'),
           )}
         >
           {message.kind === 'text' && <p className="text-pretty">{message.body}</p>}
 
           {message.kind === 'voice' && (
-            <VoiceMessage
-              seconds={message.seconds}
-              waveform={message.waveform}
-              mine={mine}
-            />
+            <VoiceMessage seconds={message.seconds} waveform={message.waveform} mine={mine} />
           )}
 
           {message.kind === 'file' && (
@@ -136,41 +221,25 @@ export function MessageRow({
           )}
 
           {message.kind === 'video' && (
-            <span className="block w-[13rem] overflow-hidden rounded-xl">
-              <span className="relative block aspect-[4/3]">
+            <span className="block w-44">
+              <span className="relative block aspect-square overflow-hidden rounded-full raised-sm">
                 <Image
                   src={message.poster || '/placeholder.svg'}
                   alt="Video message preview"
                   fill
-                  sizes="216px"
+                  sizes="176px"
                   className="object-cover"
                 />
-                <span className="absolute inset-0 grid place-items-center">
-                  <span className="grid size-11 place-items-center rounded-full bg-background/80 backdrop-blur-sm">
-                    <Play className="size-4 translate-x-[1px] text-primary" fill="currentColor" />
+                <span className="absolute inset-0 grid place-items-center bg-foreground/10">
+                  <span className="grid size-11 place-items-center rounded-full bg-background/85 text-primary backdrop-blur-sm">
+                    <Play className="size-4 translate-x-[1px]" fill="currentColor" />
                   </span>
-                </span>
-                <span className="absolute bottom-1.5 left-1.5 rounded-full bg-background/80 px-2 py-[2px] font-mono text-[10px] text-foreground">
-                  {message.length}
                 </span>
               </span>
             </span>
           )}
 
-          <span
-            className={cn(
-              'mt-1 flex items-center justify-end gap-1 font-mono text-[10px]',
-              mine ? 'text-primary-foreground/70' : 'text-muted-foreground',
-            )}
-          >
-            {message.time}
-            {mine &&
-              (message.read ? (
-                <CheckCheck className="size-3" />
-              ) : (
-                <Check className="size-3" />
-              ))}
-          </span>
+          <span className="mt-1 block">{timeMark}</span>
         </div>
       </div>
 
@@ -183,9 +252,7 @@ export function MessageRow({
               onClick={() => onReact(r.emoji)}
               className={cn(
                 'flex items-center gap-1 rounded-full px-2 py-[3px] text-xs transition-transform active:scale-95',
-                r.mine
-                  ? 'bg-accent text-accent-foreground pressed-sm'
-                  : 'bg-card text-card-foreground raised-sm',
+                r.mine ? 'bg-accent text-accent-foreground pressed-sm' : 'bg-card text-card-foreground raised-sm',
               )}
             >
               <span className="text-[13px] leading-none">{r.emoji}</span>

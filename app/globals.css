@@ -95,6 +95,19 @@
       inset 3px 3px 7px rgb(var(--paper-shade) / 0.4),
       inset -3px -3px 7px rgb(var(--paper-light) / 0.8);
   }
+  .menu-action {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    width: 100%;
+    border-radius: 0.75rem;
+    padding: 0.55rem 0.65rem;
+    font-size: 0.8rem;
+    text-align: left;
+  }
+  .menu-action:hover {
+    background: var(--accent);
+  }
   .paper-grain {
     background-image: radial-gradient(rgb(var(--paper-shade) / 0.18) 0.5px, transparent 0.5px);
     background-size: 4px 4px;

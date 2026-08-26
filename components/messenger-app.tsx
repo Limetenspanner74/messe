@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { LogIn } from 'lucide-react'
 import { chats as seed, type Message } from '@/lib/messenger-data'
+import { WelcomeScreen } from '@/components/welcome-screen'
 import { NavBar, PhoneFrame } from '@/components/phone-frame'
 import { ChatListScreen } from '@/components/chat-list-screen'
 import { ChatScreen } from '@/components/chat-screen'
@@ -13,7 +14,10 @@ import { DesktopShell, type Screen } from '@/components/desktop-shell'
 
 export function MessengerApp() {
   const [data, setData] = useState(seed)
+  const [started, setStarted] = useState(false)
   const [screen, setScreen] = useState<Screen>({ name: 'chats' })
+
+  if (!started) return <WelcomeScreen onStart={() => setStarted(true)} />
 
   const update = (id: string, messages: Message[]) =>
     setData((list) =>
