@@ -1,0 +1,137 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@theme inline {
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --font-sans: 'Outfit', 'Outfit Fallback';
+  --font-mono: 'IBM Plex Mono', 'IBM Plex Mono Fallback';
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+}
+
+:root {
+  color-scheme: light;
+  /* book paper — lighter than desert sand */
+  --background: oklch(0.945 0.019 84);
+  --foreground: oklch(0.32 0.024 58);
+  --card: oklch(0.964 0.016 86);
+  --card-foreground: oklch(0.32 0.024 58);
+  --popover: oklch(0.972 0.014 86);
+  --popover-foreground: oklch(0.32 0.024 58);
+  --primary: oklch(0.47 0.062 252);
+  --primary-foreground: oklch(0.972 0.014 86);
+  --secondary: oklch(0.9 0.028 82);
+  --secondary-foreground: oklch(0.36 0.024 58);
+  --muted: oklch(0.912 0.024 82);
+  --muted-foreground: oklch(0.53 0.026 62);
+  --accent: oklch(0.88 0.036 80);
+  --accent-foreground: oklch(0.34 0.024 58);
+  --destructive: oklch(0.53 0.15 27);
+  --border: oklch(0.874 0.028 80);
+  --input: oklch(0.9 0.026 82);
+  --ring: oklch(0.47 0.062 252);
+  --radius: 0.75rem;
+
+  --paper-light: 255 253 247;
+  --paper-shade: 176 154 118;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer utilities {
+  /* soft embossed surfaces, like pressed paper */
+  .raised {
+    box-shadow:
+      5px 5px 12px rgb(var(--paper-shade) / 0.38),
+      -5px -5px 12px rgb(var(--paper-light) / 0.85);
+  }
+  .raised-sm {
+    box-shadow:
+      3px 3px 7px rgb(var(--paper-shade) / 0.32),
+      -3px -3px 7px rgb(var(--paper-light) / 0.8);
+  }
+  .pressed {
+    box-shadow:
+      inset 4px 4px 9px rgb(var(--paper-shade) / 0.4),
+      inset -4px -4px 9px rgb(var(--paper-light) / 0.8);
+  }
+  .pressed-sm {
+    box-shadow:
+      inset 2px 2px 5px rgb(var(--paper-shade) / 0.36),
+      inset -2px -2px 5px rgb(var(--paper-light) / 0.75);
+  }
+  .active-press:active {
+    box-shadow:
+      inset 3px 3px 7px rgb(var(--paper-shade) / 0.4),
+      inset -3px -3px 7px rgb(var(--paper-light) / 0.8);
+  }
+  .paper-grain {
+    background-image: radial-gradient(rgb(var(--paper-shade) / 0.18) 0.5px, transparent 0.5px);
+    background-size: 4px 4px;
+  }
+  /* roomier bubbles inside the desktop conversation pane */
+  .wide-bubbles [data-bubble] {
+    max-width: 30rem;
+  }
+  .thin-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  .thin-scrollbar::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background-color: rgb(var(--paper-shade) / 0.35);
+  }
+  .thin-scrollbar::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.rise-in {
+  animation: rise-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
