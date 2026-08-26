@@ -7,7 +7,7 @@ const nextConfig = {
     unoptimized: true,
   },
   output: 'export',
-  basePath: process.env.NODE_ENV === 'production' ? '/paper-messenger' : '',
+  basePath: process.env.NODE_ENV === 'production' ? '/messe' : '',
   trailingSlash: true,
 }
 
